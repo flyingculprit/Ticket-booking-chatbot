@@ -1,0 +1,116 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+/* .read-the-docs {
+  color: #888;
+} */
+.chatbot-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  max-width: 400px; /* Adjust width as needed */
+}
+
+.chatbot-container .react-chatbotify-chatbot {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+button {
+  background-color: #491d8d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+input {
+  padding: 5px;
+  border-radius: 5px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+}
+
+input[type="date"],
+input[type="time"] {
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.chatbot-container .react-chatbotify-chatbot .react-chatbotify-chat-container {
+  font-family: Arial, sans-serif;
+  background-color: #fff;
+  padding: 10px;
+}
+
+/* App.css */
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-image: url("/ChatBot/src/assets/bgimage.jpg"); /* Replace with your image URL */
+  background-size: cover;
+  background-position: center;
+}
+
+.blur-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* backdrop-filter: blur(8px);  */
+  /* Adjust blur level here */
+  z-index: -1;
+}
+
+.blur-background img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the div */
+  filter: blur(3px); /* Adjust the blur level */
+  transform: scale(
+    1.1
+  ); /* Optional: slightly scales the image for better effect */
+}

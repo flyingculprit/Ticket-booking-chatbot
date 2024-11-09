@@ -1,0 +1,23 @@
+/* Form.css */
+.form-container {
+  background-color: #fff; /* Set background color to white */
+  width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow effect */
+}
+
+/* Add margin-bottom to form elements */
+.form-container form > * {
+  margin-bottom: 16px; /* Adjust the value as needed */
+}
+
+/* Optional: Add margin to the submit button for bottom spacing */
+.form-container button {
+  margin-top: 16px; /* To add gap above the button */
+  margin-bottom: 16px; /* To add gap below the button */
+}
+.custom-picker {
+  width: 100%; /* Makes the picker full width */
+}
