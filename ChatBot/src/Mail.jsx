@@ -8,9 +8,9 @@ import {
   Typography,
 } from "@mui/material";
 
-const Mail = ({ setMailVerified }) => {
+const Mail = ({ setMailVerified, onEmailChange }) => {
   const [form, setForm] = useState({
-    email: "thamizh5253@gmail.com",
+    email: "",
   });
   const [otpSent, setOtpSent] = useState(false); // Track if OTP is sent
   const [otp, setOtp] = useState(["", "", "", ""]); // Array for 4-digit OTP
@@ -19,6 +19,7 @@ const Mail = ({ setMailVerified }) => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+    onEmailChange(value);
   };
 
   const sendOtp = async () => {

@@ -14,7 +14,7 @@ const MyChatBot = () => {
   const openModal = () => {
     setModalOpen(true);
     // console.log("open modal");
-    sendOtpEmail(form);
+    // sendOtpEmail(form);
     // sendConfirmationEmail(form);
   };
   const closeModal = () => setModalOpen(false);
@@ -77,6 +77,30 @@ const MyChatBot = () => {
         setForm({ ...form, city: params.userInput });
         setCitySelected(true);
       },
+      path: "ask_museum",
+    },
+    ask_museum: {
+      message: "Please select the museum you would like to visit.",
+      options: (params) => {
+        const cityMuseums = {
+          Karur: ["Veerakkumaran Patty Museum", "Government Museum Karur"],
+          Trichy: [
+            "Rail Museum",
+            "Rani Mangammal District Museum",
+            "Kallanai (Grand Anaicut) Museum",
+          ],
+          Salem: [
+            "Salem Witch Museum",
+            "Witch Dungeon Museum",
+            "Salem Art Gallery",
+          ],
+        };
+        return cityMuseums[form.city] || [];
+      },
+      chatDisabled: true,
+      function: (params) => {
+        setForm({ ...form, museum: params.userInput });
+      },
       path: "ask_date",
     },
     ask_date: {
@@ -94,6 +118,7 @@ const MyChatBot = () => {
       ),
       path: "ask_time",
     },
+
     ask_time: {
       message: "What time would you like to visit?",
       type: "custom",
@@ -117,8 +142,39 @@ const MyChatBot = () => {
     },
     ask_email: {
       message: "Please enter your email ID for confirmation.",
-      function: (params) => setForm({ ...form, email: params.userInput }),
-      path: "ask_payment",
+      function: async (params) => {
+        setForm({ ...form, email: params.userInput });
+        console.log(params.userInput);
+        await sendOtpEmail(params.userInput);
+      },
+      path: "ask_otp",
+    },
+    ask_otp: {
+      message:
+        "A 4-digit OTP has been sent to your email. Please enter the OTP to continue.",
+      type: "number",
+      function: async (params) => {
+        const otp = params.userInput;
+        const isValid = await verifyOtp(otp, form.email);
+        if (isValid) {
+          setOtpSent(true);
+          sendConfirmationEmail(form);
+        } else {
+          setOtpSent(false);
+        }
+      },
+      path: () => (otpSent ? "ask_payment" : "ask_otp_retry"),
+    },
+    ask_otp_retry: {
+      message:
+        "The OTP entered is incorrect. Please try again or request a new OTP.",
+      options: ["Retry", "Resend OTP"],
+      path: "ask_otp",
+      function: async (params) => {
+        if (params.userInput === "Resend OTP") {
+          await sendOtpEmail(form);
+        }
+      },
     },
     ask_payment: {
       message: "Please complete the payment to confirm your booking.",
@@ -141,112 +197,28 @@ const MyChatBot = () => {
             >
               Pay Now
             </button>
-            {/* <div id="payment-container" style={{ marginTop: "20px" }}></div> */}
           </div>
         );
       },
-      path: "ask_otp",
-    },
-    ask_otp: {
-      message:
-        "A 4-digit OTP has been sent to your email. Please enter the OTP to continue.",
-      type: "number",
-
-      function: async (params) => {
-        const otp = params.userInput;
-        // setOtpSent(await verifyOtp(otp, form.email));
-        const isValid = await verifyOtp(otp, form.email);
-        console.log(isValid, "response from server");
-        if (isValid) {
-          setOtpSent(true);
-          sendConfirmationEmail(form);
-        } else {
-          setOtpSent(false);
-        }
-        console.log(otpSent, "state otp");
-      },
-
-      // Use a conditional callback function to decide the next path based on otpSent
-      path: () => (otpSent ? "confirmation" : "ask_otp_retry"),
-
-      // path: otpSent ? "confirmation" : "ask_otp_retry",
+      path: "confirmation",
     },
 
-    ask_otp_retry: {
-      message:
-        "The OTP entered is incorrect. Please try again or request a new OTP.",
-      options: ["Retry", "Resend OTP"],
-      path: "ask_otp", // Retry OTP input
-      function: async (params) => {
-        if (params.userInput === "Resend OTP") {
-          await sendOtpEmail(form); // Send OTP email(form);
-          console.log("Resending OTP...");
-        }
-      },
-    },
     confirmation: {
       message: (params) => {
-        const { name, city, date, time, members, email } = form;
-        const confirmationMessage = `Thank you, ${name}! Your ticket for ${city} museum has been successfully booked for ${date} at ${time}. Total members: ${members}. A confirmation will be sent to ${email}. Enjoy your visit!`;
+        const { name, city, museum, date, time, members, email } = form;
+        const confirmationMessage = `Thank you, ${name}! Your ticket for ${museum} in ${city} has been successfully booked for ${date} at ${time}. Total members: ${members}. A confirmation will be sent to ${email}. Enjoy your visit!`;
 
         return confirmationMessage;
       },
       component: (
         <div style={{ ...formStyle, color: "blue" }}>
-          <p
-            style={{
-              fontSize: "13px",
-              fontFamily: "Arial, sans-serif",
-              textAlign: "left",
-            }}
-          >
-            Name: {form.name}
-          </p>
-          <p
-            style={{
-              fontSize: "13px",
-              fontFamily: "Arial, sans-serif",
-              textAlign: "left",
-            }}
-          >
-            City: {form.city}
-          </p>
-          <p
-            style={{
-              fontSize: "13px",
-              fontFamily: "Arial, sans-serif",
-              textAlign: "left",
-            }}
-          >
-            Date: {form.date}
-          </p>
-          <p
-            style={{
-              fontSize: "13px",
-              fontFamily: "Arial, sans-serif",
-              textAlign: "left",
-            }}
-          >
-            Time: {form.time}
-          </p>
-          <p
-            style={{
-              fontSize: "13px",
-              fontFamily: "Arial, sans-serif",
-              textAlign: "left",
-            }}
-          >
-            Members: {form.members}
-          </p>
-          <p
-            style={{
-              fontSize: "13px",
-              fontFamily: "Arial, sans-serif",
-              textAlign: "left",
-            }}
-          >
-            Email: {form.email}
-          </p>
+          <p>Name: {form.name}</p>
+          <p>City: {form.city}</p>
+          <p>Museum: {form.museum}</p>
+          <p>Date: {form.date}</p>
+          <p>Time: {form.time}</p>
+          <p>Members: {form.members}</p>
+          <p>Email: {form.email}</p>
         </div>
       ),
       options: ["New Application"],
@@ -254,18 +226,12 @@ const MyChatBot = () => {
       path: "start",
     },
   };
-
   const sendOtpEmail = async (email) => {
-    // const emailObject = { email: "thamizh5253@gmail.com" };
-    const emailString = email.email;
-    // console.log(email);
-    // console.log(emailString);
     try {
       const response = await axios.post("http://localhost:3000/api/send-otp", {
-        email: emailString,
+        email, // Directly use the email string
       });
 
-      // Check if the server response has a 'success' key in response.data
       if (response.data.success) {
         console.log("OTP sent successfully:", response.data.message);
       } else {
@@ -309,7 +275,7 @@ const MyChatBot = () => {
 
   // Send the confirmation email after booking
   const sendConfirmationEmail = async (formData) => {
-    const { name, city, date, time, members, email } = formData;
+    const { name, city, date, time, members, email, museum } = formData;
 
     try {
       const response = await fetch("http://localhost:3000/send-email", {
@@ -317,7 +283,15 @@ const MyChatBot = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, city, date, time, members, email }),
+        body: JSON.stringify({
+          name,
+          city,
+          date,
+          time,
+          members,
+          email,
+          museum,
+        }),
       });
 
       if (response.ok) {

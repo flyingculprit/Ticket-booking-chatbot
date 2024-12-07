@@ -6,6 +6,9 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Card,
+  CardMedia,
+  Typography,
 } from "@mui/material";
 import "./Form.css";
 import { MenuItem, FormControl, InputLabel, Select } from "@mui/material";
@@ -18,12 +21,34 @@ import { TimePicker } from "@mui/x-date-pickers/TimePicker";
 import Modal from "./Payment";
 import Mail from "./Mail";
 const Form = () => {
+  const museums = {
+    Karur: ["Veerakkumaran Patty Museum", "Government Museum Karur"],
+    Trichy: [
+      "Rail Museum",
+      "Rani Mangammal District Museum",
+      "Kallanai (Grand Anaicut) Museum",
+    ],
+    Salem: ["Salem Witch Museum", "Witch Dungeon Museum", "Salem Art Gallery"],
+  };
+
+  const museumImages = {
+    "Veerakkumaran Patty Museum": "/images/veerakkumaran.jpeg",
+    "Government Museum Karur": "/images/gov_karur.jpeg",
+    "Rail Museum": "/images/rail_museum.jpeg",
+    "Rani Mangammal District Museum": "/images/rani_mangammal.jpeg",
+    "Kallanai (Grand Anaicut) Museum": "/images/kallanai.jpeg",
+    "Salem Witch Museum": "/images/salem_witch.jpeg",
+    "Witch Dungeon Museum": "/images/witch_dungeon.jpeg",
+    "Salem Art Gallery": "/images/salem_art.jpeg",
+  };
+
   const [form, setForm] = useState({
-    name: "Tham",
-    city: "Karur",
+    name: "",
+    city: "",
+    museum: "",
     date: "",
     time: "",
-    members: "4",
+    members: "",
     email: "thamizh5253@gmail.com",
   });
   const [isModalOpen, setModalOpen] = useState(false);
@@ -41,7 +66,10 @@ const Form = () => {
       setPaymentModalOpen(true); // Open the payment modal when "Book Now" is clicked
     }
   };
-
+  // Function to update email in form state
+  const handleEmailChange = (email) => {
+    setForm((prevForm) => ({ ...prevForm, email }));
+  };
   const openModal = () => {
     handlePaymentClose();
     console.log(form);
@@ -51,6 +79,15 @@ const Form = () => {
   };
   const closeModal = () => setModalOpen(false);
   const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpen(false);
+  };
 
   const handleDateChange = (newValue) => {
     // const formattedDate = dayjs(newValue).format("MM/DD/YYYY");
@@ -91,7 +128,7 @@ const Form = () => {
 
   // Send the confirmation email after booking
   const sendConfirmationEmail = async (formData) => {
-    const { name, city, date, time, members, email } = formData;
+    const { name, city, date, time, members, email, museum } = formData;
 
     try {
       const response = await fetch("http://localhost:3000/send-email", {
@@ -99,7 +136,15 @@ const Form = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, city, date, time, members, email }),
+        body: JSON.stringify({
+          name,
+          city,
+          date,
+          time,
+          members,
+          email,
+          museum,
+        }),
       });
 
       if (response.ok) {
@@ -147,6 +192,27 @@ const Form = () => {
             <MenuItem value="Salem">Salem</MenuItem>
           </Select>
         </FormControl>
+
+        {form.city && (
+          <FormControl fullWidth required>
+            <InputLabel id="demo-simple-select-helper-label">Museum</InputLabel>
+            <Select
+              labelId="demo-simple-select-helper-label"
+              id="demo-simple-select-helper"
+              name="museum"
+              label="Age111"
+              value={form.museum}
+              onChange={handleInputChange}
+            >
+              {museums[form.city].map((museum) => (
+                <MenuItem key={museum} value={museum}>
+                  {museum}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        )}
+
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DemoContainer components={["DatePicker"]}>
             <DatePicker
@@ -193,7 +259,10 @@ const Form = () => {
           fullWidth
           required
         /> */}
-        <Mail setMailVerified={setMailVerified} />
+        <Mail
+          setMailVerified={setMailVerified}
+          onEmailChange={handleEmailChange}
+        />
 
         <Button
           type="submit"
@@ -203,6 +272,17 @@ const Form = () => {
         >
           Book Now
         </Button>
+
+        {form.museum && (
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{ mt: 2, ml: 2 }}
+            onClick={handleOpenModal}
+          >
+            View Image
+          </Button>
+        )}
       </form>
 
       {/* Payment Modal */}
@@ -237,6 +317,28 @@ const Form = () => {
             color="primary"
           >
             Pay Now
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Image Modal */}
+      <Dialog open={open} onClose={handleCloseModal}>
+        {form.museum && museumImages[form.museum] && (
+          <Card sx={{ maxWidth: 345, margin: 2 }}>
+            <CardMedia
+              component="img"
+              height="200"
+              image={museumImages[form.museum]}
+              alt={form.museum}
+            />
+            <Typography variant="h6" align="center" sx={{ padding: 1 }}>
+              {form.museum}
+            </Typography>
+          </Card>
+        )}
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="error">
+            Close
           </Button>
         </DialogActions>
       </Dialog>

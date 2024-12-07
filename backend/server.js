@@ -6,13 +6,18 @@ const mongoose = require("mongoose");
 const app = express();
 app.use(express.json());
 app.use(cors());
-
+// mongodb+srv://chatbot:<db_password>@clusterfirst.x2s8v.mongodb.net/?retryWrites=true&w=majority&appName=ClusterFirst
+// mongodb://localhost:27017/museum-booking
 // MongoDB connection
-mongoose
-  .connect("mongodb://localhost:27017/museum-booking", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+mongodb: mongoose
+  .connect(
+    "mongodb+srv://chatbot:chatbot@clusterfirst.x2s8v.mongodb.net/?retryWrites=true&w=majority",
+    // "mongodb+srv://Tham:Tham@cluster1.rqehbqf.mongodb.net/ServNow?retryWrites=true&w=majority",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
@@ -22,6 +27,7 @@ const userSchema = new mongoose.Schema({
   city: String,
   date: String,
   time: String,
+  museum: String,
   members: Number,
   email: { type: String, required: true, unique: true },
 });
@@ -41,8 +47,8 @@ const transporter = nodemailer.createTransport({
   port: 465,
   secure: true,
   auth: {
-    user: "your@gmail.com",
-    pass: "password",
+    user: "museumchatbot9@gmail.com",
+    pass: "naoz xbeg wxba kxtr",
   },
 });
 
@@ -53,7 +59,7 @@ function generateOTP() {
 
 // API to send confirmation email with OTP
 app.post("/send-email", async (req, res) => {
-  const { name, city, date, time, members, email } = req.body;
+  const { name, city, date, time, members, email, museum } = req.body;
   if (!email) {
     return res.status(400).send("Email is required");
   }
@@ -62,7 +68,7 @@ app.post("/send-email", async (req, res) => {
     // Update or create user in the database
     await User.findOneAndUpdate(
       { email },
-      { name, city, date, time, members },
+      { name, city, date, time, members, museum },
       { upsert: true, new: true }
     );
   } catch (error) {
@@ -74,7 +80,7 @@ app.post("/send-email", async (req, res) => {
     from: "thamizhmass057@gmail.com",
     to: email,
     subject: "Museum Ticket Booking Confirmation",
-    text: `Dear ${name},\n\nYour ticket for the ${city} museum has been successfully booked for ${date} at ${time}.\nTotal members: ${members}.\n\nThank you for booking with us!\n\nBest Regards,\nMuseum Team`,
+    text: `Dear ${name},\n\nYour ticket for the ${museum} in ${city} has been successfully booked for ${date} at ${time}.\nTotal members: ${members}.\n\nThank you for booking with us!\n\nBest Regards,\nMuseum Team`,
   };
 
   // Send email
